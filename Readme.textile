@@ -1,0 +1,3 @@
+h1. In A Dice Age
+
+p. Dice rolling bot for Eclipse Phase games.
