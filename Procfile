@@ -1,1 +1,1 @@
-worker: bundle exec ./iada.rb
+worker: ./iada.rb
