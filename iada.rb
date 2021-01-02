@@ -24,9 +24,11 @@ bot.command :vs do |event, vs, *fr|
     diff = (vs - roll).abs
   end
 
+  sig = dif > 30
+
   res = "#{event.author.display_name} rolled `#{roll}` against `#{vs}`" +
         "#{fr.empty? ? "" : " for \"#{fr.join(' ')}\""}. " +
-        "That is a _#{crit ? "**critical** " : ""}#{success ? "success" : "failure"}_ " +
+        "That is a _#{sig ? "significant " : ""}#{crit ? "**critical** " : ""}#{success ? "success" : "failure"}_ " +
         "by `#{diff}` (#{diff / 10} Mo#{success ? "S" : "F"})."
 
   puts res
