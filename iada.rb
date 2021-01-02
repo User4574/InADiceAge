@@ -24,7 +24,7 @@ bot.command :vs do |event, vs, *fr|
     diff = (vs - roll).abs
   end
 
-  sig = dif > 30
+  sig = diff > 30
 
   res = "#{event.author.display_name} rolled `#{roll}` against `#{vs}`" +
         "#{fr.empty? ? "" : " for \"#{fr.join(' ')}\""}. " +
