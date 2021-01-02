@@ -13,7 +13,7 @@ bot.command :vs do |event, vs, *fr|
   when 0
     crit = true
     success = true
-    diff = max(vs - roll, 0)
+    diff = [vs - roll, 0].max
   when 99
     crit = true
     success = false
