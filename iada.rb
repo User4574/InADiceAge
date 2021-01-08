@@ -18,10 +18,14 @@ def human_result(name, roll, vs, fr, prefix = "")
     diff = (vs - roll).abs
   end
 
-  sig = diff > 30
+  sig = diff >= 30
+
   prefix + "#{name} rolled `#{roll}` against `#{vs}`" +
     "#{fr.empty? ? "" : " for \"#{fr.join(' ')}\""}. " +
-    "That is a _#{sig ? "significant " : ""}#{crit ? "**critical** " : ""}#{success ? "success" : "failure"}_ " +
+
+    "That is #{(sig && !crit) ? "an" : "a"} _#{crit ? "**critical** " : ""}" +
+    "#{sig ? "excellent " : ""}#{success ? "success" : "failure"}_ " +
+
     "by `#{diff}` (#{diff / 10} Mo#{success ? "S" : "F"})."
 end
 
@@ -40,6 +44,17 @@ bot.command(:vs, description: "Roll a d100 (0-99) against a target number, with 
   res
 end
 
+bot.command(:again, description: "Repeat your last vs roll.") do |event|
+  roll, vs, fr = last_roll[event.author.id]
+  roll = rand(100)
+
+  last_roll[event.author.id] = [roll, vs, fr]
+
+  res = human_result(event.author.display_name, roll, vs, fr, "Repeat: ")
+  puts res
+  res
+end
+
 bot.command(:moxie, description: "Perform a moxie digit swap on your last vs roll.") do |event|
   roll, vs, fr = last_roll[event.author.id]
   roll = ((roll % 10) * 10) + (roll / 10)
@@ -51,7 +66,7 @@ bot.command(:moxie, description: "Perform a moxie digit swap on your last vs rol
   res
 end
 
-bot.command(:remind, description: "Get a reminder of your last vs roll.") do |event|
+bot.command(:remind, description: "Get a reminder of the result of your last vs roll.") do |event|
   roll, vs, fr = last_roll[event.author.id]
 
   res = human_result(event.author.display_name, roll, vs, fr, "Reminder: ")
