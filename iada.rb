@@ -46,22 +46,32 @@ end
 
 bot.command(:again, description: "Repeat your last vs roll.") do |event|
   roll, vs, fr = last_roll[event.author.id]
-  roll = rand(100)
 
-  last_roll[event.author.id] = [roll, vs, fr]
+  if roll.nil?
+    res = "You need to roll something first, #{event.author.display_name}!"
+  else
+    roll = rand(100)
+    last_roll[event.author.id] = [roll, vs, fr]
 
-  res = human_result(event.author.display_name, roll, vs, fr, "Repeat: ")
+    res = human_result(event.author.display_name, roll, vs, fr, "Repeat: ")
+  end
+
   puts res
   res
 end
 
 bot.command(:moxie, description: "Perform a moxie digit swap on your last vs roll.") do |event|
   roll, vs, fr = last_roll[event.author.id]
-  roll = ((roll % 10) * 10) + (roll / 10)
 
-  last_roll[event.author.id] = [roll, vs, fr]
+  if roll.nil?
+    res = "You need to roll something first, #{event.author.display_name}!"
+  else
+    roll = ((roll % 10) * 10) + (roll / 10)
+    last_roll[event.author.id] = [roll, vs, fr]
 
-  res = human_result(event.author.display_name, roll, vs, fr, "Moxie swap: ")
+    res = human_result(event.author.display_name, roll, vs, fr, "Moxie swap: ")
+  end
+
   puts res
   res
 end
@@ -69,7 +79,12 @@ end
 bot.command(:remind, description: "Get a reminder of the result of your last vs roll.") do |event|
   roll, vs, fr = last_roll[event.author.id]
 
-  res = human_result(event.author.display_name, roll, vs, fr, "Reminder: ")
+  if roll.nil?
+    res = "You need to roll something first, #{event.author.display_name}!"
+  else
+    res = human_result(event.author.display_name, roll, vs, fr, "Reminder: ")
+  end
+
   puts res
   res
 end
