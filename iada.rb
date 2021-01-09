@@ -23,8 +23,10 @@ def human_result(name, roll, vs, fr, prefix = "")
   prefix + "#{name} rolled `#{roll}` against `#{vs}`" +
     "#{fr.empty? ? "" : " for \"#{fr.join(' ')}\""}. " +
 
-    "That is #{(sig && !crit) ? "an" : "a"} _#{crit ? "**critical** " : ""}" +
-    "#{sig ? "excellent " : ""}#{success ? "success" : "failure"}_ " +
+    "That is #{(!crit && sig && success) ? "an" : "a"} " +
+    "_#{crit ? "**critical** " : ""}" +
+    "#{sig ? (success ? "excellent " : "severe ") : ""}" +
+    "#{success ? "success" : "failure"}_ " +
 
     "by `#{diff}` (#{diff / 10} Mo#{success ? "S" : "F"})."
 end
