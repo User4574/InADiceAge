@@ -19,13 +19,15 @@ def human_result(name, roll, vs, fr, prefix = "")
   end
 
   sig = diff >= 30
+  supsig = diff >= 60
 
   prefix + "#{name} rolled `#{roll}` against `#{vs}`" +
     "#{fr.empty? ? "" : " for \"#{fr.join(' ')}\""}. " +
 
     "That is #{(!crit && sig && success) ? "an" : "a"} " +
     "_#{crit ? "**critical** " : ""}" +
-    "#{sig ? (success ? "excellent " : "severe ") : ""}" +
+    "#{sig && !supsig ? (success ? "excellent " : "severe ") : ""}" +
+    "#{supsig ? (success ? "exceptional " : "horrific ") : ""}" +
     "#{success ? "success" : "failure"}_ " +
 
     "by `#{diff}` (#{diff / 10} Mo#{success ? "S" : "F"})."
