@@ -106,4 +106,20 @@ bot.command(:init, description: "Roll a d10 (1-10) and add an init modifier, wit
   res
 end
 
+bot.command(:unitest, description: "Perform a uniformity test for peace of mind.") do |event|
+  t = 10_000_000
+  u = t / 100
+
+  a = Array.new(100, 0)
+  t.times { a[rand(100)] += 1 }
+
+  d2 = a.map { |o| (o - u) ** 2 }
+  s2 = d2.sum / 100.0
+  s = s2 ** 0.5
+
+  res = "#{event.author.display_name} requested a uniformity test. #{t} dice were rolled and counted. The standard deviation was #{"%.2f" % s}, which means 68% of the possible outcomes each appeared within #{s.ceil} of the expected #{u} times, 95% within #{(s*2).ceil}, and 99.7% within #{(s*3).ceil}."
+  puts res
+  res
+end
+
 bot.run
