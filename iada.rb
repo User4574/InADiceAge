@@ -122,4 +122,12 @@ bot.command(:unitest, description: "Perform a uniformity test for peace of mind.
   res
 end
 
+bot.command(:reseed, description: "Reseed the PRNG if you're feeling particularly superstitious about the rolls.") do |event|
+  srand
+
+  res = "#{event.author.display_name} requested the PRNG be reseeded."
+  puts res
+  res
+end
+
 bot.run
