@@ -51,7 +51,7 @@ def human_result(name, data, prefix = "")
     (sups > 0 ? "_superior_ " : "") +
     (crit ? "_**critical**_ " : "") +
     (success ? "success" : "failure") +
-    (sups > 1 ? (success ? "es" : "s") : "")
+    (sups > 1 ? (success ? "es." : "s.") : ".")
 end
 
 last_roll = {}
@@ -100,7 +100,8 @@ bot.command(:flipflop, description: "Swap the digits on your last vs roll.") do 
     res = "You have already downgraded this failure, #{event.author.display_name}."
   else
     roll = ((roll % 10) * 10) + (roll / 10)
-    last_roll[event.author.id] = [roll, vs, fr, !flip, up, down]
+    data = [roll, vs, fr, !flip, up, down]
+    last_roll[event.author.id] = data
 
     res = human_result(event.author.display_name, data, (flip ? "Unflip-flop: " : "Flip-flop: "))
   end
@@ -122,7 +123,8 @@ bot.command(:upgrade, description: "Increase the number of superiors on your las
   elsif calc_sups(roll, vs) > 1
     res = "This is already two superior successes, #{event.author.display_name}!"
   else
-    last_roll[event.author.id] = [roll, vs, fr, flip, !up, down]
+    data = [roll, vs, fr, flip, !up, down]
+    last_roll[event.author.id] = data
 
     res = human_result(event.author.display_name, data, (up ? "Unupgrade: " : "Upgrade: "))
   end
@@ -144,7 +146,8 @@ bot.command(:downgrade, description: " last vs roll.") do |event|
   elsif !calc_crit(roll)
     res = "This isn't a critical failure, #{event.author.display_name}."
   else
-    last_roll[event.author.id] = [roll, vs, fr, flip, up, !down]
+    data = [roll, vs, fr, flip, up, !down]
+    last_roll[event.author.id] = data
 
     res = human_result(event.author.display_name, data, (down ? "Undowngrade: " : "Downgrade: "))
   end
