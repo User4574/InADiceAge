@@ -6,7 +6,7 @@ def make_roll(dX = 100)
   rand(100_000_000 * dX) % dX
 end
 
-def calc_sups(roll, success = true)
+def calc_sups(roll, vs)
   case roll
   when 0
     success = true
