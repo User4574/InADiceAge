@@ -94,9 +94,9 @@ bot.command(:flipflop, description: "Swap the digits on your last vs roll.") do 
 
   if roll.nil?
     res = "You need to roll something first, #{event.author.display_name}!"
-  else if up
+  elsif up
     res = "You have already upgraded this success, #{event.author.display_name}."
-  else if up
+  elsif up
     res = "You have already downgraded this failure, #{event.author.display_name}."
   else
     roll = ((roll % 10) * 10) + (roll / 10)
@@ -115,11 +115,11 @@ bot.command(:upgrade, description: "Increase the number of superiors on your las
 
   if roll.nil?
     res = "You need to roll something first, #{event.author.display_name}!"
-  else if flip
+  elsif flip
     res = "You have already flip-flopped this roll, #{event.author.display_name}."
-  else if down
+  elsif down
     res = "You have already downgraded this failure, #{event.author.display_name}."
-  else if calc_sups(roll, vs) > 1
+  elsif calc_sups(roll, vs) > 1
     res = "This is already two superior successes, #{event.author.display_name}!"
   else
     last_roll[event.author.id] = [roll, vs, fr, flip, !up, down]
@@ -137,11 +137,11 @@ bot.command(:downgrade, description: " last vs roll.") do |event|
 
   if roll.nil?
     res = "You need to roll something first, #{event.author.display_name}!"
-  else if flip
+  elsif flip
     res = "You have already flip-flopped this roll, #{event.author.display_name}."
-  else if up
+  elsif up
     res = "You have already upgraded this success, #{event.author.display_name}."
-  else if !calc_crit(roll)
+  elsif !calc_crit(roll)
     res = "This isn't a critical failure, #{event.author.display_name}."
   else
     last_roll[event.author.id] = [roll, vs, fr, flip, up, !down]
