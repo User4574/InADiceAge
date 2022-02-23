@@ -6,35 +6,52 @@ def make_roll(dX = 100)
   rand(100_000_000 * dX) % dX
 end
 
-def human_result(name, roll, vs, fr, prefix = "")
+def calc_sups(roll, success = true)
+  case roll
+  when 0
+    success = true
+  when 99
+    success = false
+  else
+    success = roll <= vs
+  end
+
+  (success ? roll : (99 - roll)) / 33
+end
+
+def calc_crit(roll)
+  roll / 10 == roll % 10
+end
+
+def human_result(name, data, prefix = "")
+  roll, vs, fr, flip, up, down = data
+
   case roll
   when 0
     crit = true
     success = true
-    diff = [vs - roll, 0].max
   when 99
     crit = true
     success = false
-    diff = (vs - roll).abs
   else
-    crit = roll.to_s[0] == roll.to_s[1]
+    crit = calc_crit(roll)
     success = roll <= vs
-    diff = (vs - roll).abs
   end
 
-  sig = diff >= 30
-  supsig = diff >= 60
+  sups = calc_sups(roll, vs)
+
+  sups += 1 if up
+  crit = false if down
 
   prefix + "#{name} rolled `#{roll}` against `#{vs}`" +
     "#{fr.empty? ? "" : " for \"#{fr.join(' ')}\""}. " +
 
-    "That is #{(!crit && sig && success) ? "an" : "a"} " +
-    "_#{crit ? "**critical** " : ""}" +
-    "#{sig && !supsig ? (success ? "excellent " : "severe ") : ""}" +
-    "#{supsig ? (success ? "exceptional " : "horrific ") : ""}" +
-    "#{success ? "success" : "failure"}_ " +
-
-    "by `#{diff}` (#{diff / 10} Mo#{success ? "S" : "F"})."
+    "That is " +
+    (sups > 1 ? "two " : "a ") +
+    (sups > 0 ? "_superior_ " : "") +
+    (crit ? "_**critical**_ " : "") +
+    (success ? "success" : "failure") +
+    (sups > 1 ? (success ? "es" : "s") : "")
 end
 
 last_roll = {}
@@ -45,39 +62,91 @@ bot.command(:vs, description: "Roll a d100 (0-99) against a target number, with 
   vs = vs.to_i
   roll = make_roll
 
-  last_roll[event.author.id] = [roll, vs, fr]
+  data = [roll, vs, fr, false, false, false]
+  last_roll[event.author.id] = data
 
-  res = human_result(event.author.display_name, roll, vs, fr)
+  res = human_result(event.author.display_name, data)
   puts res
   res
 end
 
 bot.command(:again, description: "Repeat your last vs roll.") do |event|
-  roll, vs, fr = last_roll[event.author.id]
+  data = last_roll[event.author.id]
+  roll, vs, fr, flip, up, down = data
 
   if roll.nil?
     res = "You need to roll something first, #{event.author.display_name}!"
   else
     roll = make_roll
-    last_roll[event.author.id] = [roll, vs, fr]
+    data = [roll, vs, fr, false, false, false]
+    last_roll[event.author.id] = data
 
-    res = human_result(event.author.display_name, roll, vs, fr, "Repeat: ")
+    res = human_result(event.author.display_name, data , "Repeat: ")
   end
 
   puts res
   res
 end
 
-bot.command(:moxie, description: "Perform a moxie digit swap on your last vs roll.") do |event|
-  roll, vs, fr = last_roll[event.author.id]
+bot.command(:flipflop, description: "Swap the digits on your last vs roll.") do |event|
+  data = last_roll[event.author.id]
+  roll, vs, fr, flip, up, down = data
 
   if roll.nil?
     res = "You need to roll something first, #{event.author.display_name}!"
+  else if up
+    res = "You have already upgraded this success, #{event.author.display_name}."
+  else if up
+    res = "You have already downgraded this failure, #{event.author.display_name}."
   else
     roll = ((roll % 10) * 10) + (roll / 10)
-    last_roll[event.author.id] = [roll, vs, fr]
+    last_roll[event.author.id] = [roll, vs, fr, !flip, up, down]
 
-    res = human_result(event.author.display_name, roll, vs, fr, "Moxie swap: ")
+    res = human_result(event.author.display_name, data, (flip ? "Unflip-flop: " : "Flip-flop: "))
+  end
+
+  puts res
+  res
+end
+
+bot.command(:upgrade, description: "Increase the number of superiors on your last vs roll.") do |event|
+  data = last_roll[event.author.id]
+  roll, vs, fr, flip, up, down = data
+
+  if roll.nil?
+    res = "You need to roll something first, #{event.author.display_name}!"
+  else if flip
+    res = "You have already flip-flopped this roll, #{event.author.display_name}."
+  else if down
+    res = "You have already downgraded this failure, #{event.author.display_name}."
+  else if calc_sups(roll, vs) > 1
+    res = "This is already two superior successes, #{event.author.display_name}!"
+  else
+    last_roll[event.author.id] = [roll, vs, fr, flip, !up, down]
+
+    res = human_result(event.author.display_name, data, (up ? "Unupgrade: " : "Upgrade: "))
+  end
+
+  puts res
+  res
+end
+
+bot.command(:downgrade, description: " last vs roll.") do |event|
+  data = last_roll[event.author.id]
+  roll, vs, fr, flip, up, down = data
+
+  if roll.nil?
+    res = "You need to roll something first, #{event.author.display_name}!"
+  else if flip
+    res = "You have already flip-flopped this roll, #{event.author.display_name}."
+  else if up
+    res = "You have already upgraded this success, #{event.author.display_name}."
+  else if !calc_crit(roll)
+    res = "This isn't a critical failure, #{event.author.display_name}."
+  else
+    last_roll[event.author.id] = [roll, vs, fr, flip, up, !down]
+
+    res = human_result(event.author.display_name, data, (down ? "Undowngrade: " : "Downgrade: "))
   end
 
   puts res
@@ -85,25 +154,25 @@ bot.command(:moxie, description: "Perform a moxie digit swap on your last vs rol
 end
 
 bot.command(:remind, description: "Get a reminder of the result of your last vs roll.") do |event|
-  roll, vs, fr = last_roll[event.author.id]
+  data = last_roll[event.author.id]
 
   if roll.nil?
     res = "You need to roll something first, #{event.author.display_name}!"
   else
-    res = human_result(event.author.display_name, roll, vs, fr, "Reminder: ")
+    res = human_result(event.author.display_name, data, "Reminder: ")
   end
 
   puts res
   res
 end
 
-bot.command(:init, description: "Roll a d10 (1-10) and add an init modifier, with two tie-break d10 (0-9) rolloffs.") do |event, mod|
+bot.command(:init, description: "Roll a d6 (1-6) and add an init modifier, with two tie-break d6 (0-5) rolloffs.") do |event, mod|
   mod = mod.to_i
-  roll = make_roll(10) + 1
+  roll = make_roll(6) + 1
   tot = roll + mod
 
-  d1 = make_roll(10)
-  d2 = make_roll(10)
+  d1 = make_roll(6)
+  d2 = make_roll(6)
 
   res = "#{event.author.display_name} rolled `#{roll}` and scored `#{tot}.#{d1}#{d2}` for initiative."
   puts res
